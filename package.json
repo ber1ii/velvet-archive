@@ -1,0 +1,19 @@
+{
+  "name": "velvet-archive",
+  "module": "index.ts",
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"bun run dev:web\" \"bun run dev:api\"",
+    "dev:web": "cd apps/web && bun run dev",
+    "dev:api": "cd apps/api && air",
+    "build": "bun run build:web && bun run build:api",
+    "build:web": "cd apps/web && bun run build",
+    "build:api": "cd apps/api && go build -o bin/server ./cmd/server/main.go"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
