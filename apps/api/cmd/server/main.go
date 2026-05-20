@@ -8,6 +8,10 @@ import (
 	"os"
 
 	"velvet-archive-api/internal/db"
+	"velvet-archive-api/internal/handlers"
+
+	// Alias custom middleware to avoid colliding with Chi's middleware package
+	customMiddleware "velvet-archive-api/internal/middleware"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -38,7 +42,9 @@ func main() {
 
 	// Wrap pool inside SQLC's generated query interface
 	store := db.New(pool)
-	_ = store
+
+	// 2. Instantiate your handler layer and inject the database store dependency
+	apiHandlers := handlers.NewBaseHandler(store)
 
 	// Initialize the Chi router
 	r := chi.NewRouter()
@@ -65,6 +71,26 @@ func main() {
 				return
 			}
 			w.Write([]byte("The Velvet Archive API and Database are operational."))
+		})
+
+		// Public Series Routes
+		r.Get("/series", apiHandlers.ListSeries)
+		r.Get("/series/{id}", apiHandlers.GetSeriesDetails)
+
+		// Public Entries Routes
+		r.Get("/entries/{id}", apiHandlers.GetLoreEntryDetails)
+		r.Get("/entries/{id}/links", apiHandlers.GetEntryLinks)
+
+		// Full-Text Search
+		r.Get("/search", apiHandlers.SearchArchive)
+
+		// Protected Admin Structural Sub-Router Group
+		r.Group(func(r chi.Router) {
+			// Inject custom JWT authorization security middleware layer safely here
+			r.Use(customMiddleware.RequireJWT)
+
+			r.Post("/admin/series", apiHandlers.AdminCreateSeries)
+			// Additional administrative mutation handlers will be mounted here!
 		})
 	})
 
