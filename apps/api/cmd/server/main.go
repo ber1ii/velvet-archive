@@ -93,8 +93,12 @@ func main() {
 			// Inject custom JWT authorization security middleware layer safely here
 			r.Use(customMiddleware.RequireJWT)
 
+			// Series Management
 			r.Post("/admin/series", apiHandlers.AdminCreateSeries)
-			// Additional administrative mutation handlers will be mounted here!
+
+			// Lore Nodes & Relationship Network Connections Mutations
+			r.Post("/admin/entries", apiHandlers.AdminCreateEntry)
+			r.Put("/admin/links/{id}/reveal", apiHandlers.AdminRevealLink)
 		})
 	})
 
