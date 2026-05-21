@@ -11,6 +11,29 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createAdminUser = `-- name: CreateAdminUser :one
+INSERT INTO admin_users (email, password_hash)
+VALUES ($1, $2)
+RETURNING id, email, password_hash, created_at
+`
+
+type CreateAdminUserParams struct {
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) CreateAdminUser(ctx context.Context, arg CreateAdminUserParams) (AdminUser, error) {
+	row := q.db.QueryRow(ctx, createAdminUser, arg.Email, arg.PasswordHash)
+	var i AdminUser
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createLoreEntry = `-- name: CreateLoreEntry :one
 INSERT INTO lore_entries (series_id, title, category, content, metadata, affinity)
 VALUES ($1, $2, $3, $4, $5, $6)

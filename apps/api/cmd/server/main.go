@@ -73,6 +73,10 @@ func main() {
 			w.Write([]byte("The Velvet Archive API and Database are operational."))
 		})
 
+		// Public Authentication Routes
+		r.Post("/auth/register", apiHandlers.RegisterAdmin)
+		r.Post("/auth/login", apiHandlers.LoginAdmin)
+
 		// Public Series Routes
 		r.Get("/series", apiHandlers.ListSeries)
 		r.Get("/series/{id}", apiHandlers.GetSeriesDetails)
